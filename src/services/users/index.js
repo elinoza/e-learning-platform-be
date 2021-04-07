@@ -184,7 +184,7 @@ console.log("there is progress already so this is course duration--->",course.du
         let percentage= newTotalWatch/duration
         let remainingTime=duration -newTotalWatch
 
-        console.log("there is progress already so this is newTotalWatch--->",course.duration,newTotalWatch)
+        console.log("there is progress already so course duration and  newTotalWatch--->",course.duration,newTotalWatch)
         const modifiedVideo = await myProgressSchema.findOneAndUpdate(
           {
             "user": req.user._id,
@@ -214,13 +214,14 @@ let percentage= newTotalWatch/duration
           remainingTime:  remainingTime,
           course: req.params.courseId,
           user: req.user._id,
+          completed:[]
         });
 
-       
+        console.log("hello before saving")
         //AŞağıda oluşturulan yeni progree kaydının idsi mevcut
         const { _id } = await newVideo.save();
-
-        console.log("hey new progress is saved here --> requestbody,newVideo,progressid",req.body,newVideo)
+        console.log("hello after saving")
+        console.log("hey new progress is saved here --> requestbody,newVideo,progressid",req.body,newVideo,_id)
         ///User Schemaya da  progress kaydı  atıyoruz ki daha sonra get /me ile ulaşabilelim
         const user= await UserSchema.findByIdAndUpdate(
           req.user._id,
@@ -242,7 +243,7 @@ let percentage= newTotalWatch/duration
           { runValidators: true, new: true }
         );
 
-        res.status(201).send(newVideo);
+        res.send(newVideo);
       }
     } else {
       //bu id ile bir kurs mevcut değil
