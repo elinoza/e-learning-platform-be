@@ -185,6 +185,7 @@ console.log("there is progress already so this is course duration--->",course.du
         let remainingTime=duration -newTotalWatch
 
         console.log("there is progress already so course duration and  newTotalWatch--->",course.duration,newTotalWatch)
+         
         const modifiedVideo = await myProgressSchema.findOneAndUpdate(
           {
             "user": req.user._id,
@@ -206,6 +207,7 @@ let duration= course.duration //it should be second also
 let newTotalWatch= 0// it is second
 let remainingTime=duration -newTotalWatch
 let percentage= newTotalWatch/duration
+        
         const newVideo = new myProgressSchema({
           ...req.body,
           playlistIndex:0,
