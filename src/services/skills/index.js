@@ -93,3 +93,5 @@ skillRouter.delete("/:courseId", authorize, async (req, res, next) => {
     next(error);
   }
 });
+
+module.exports = skillRouter;

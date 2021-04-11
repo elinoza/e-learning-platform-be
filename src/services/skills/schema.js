@@ -3,7 +3,8 @@ const { Schema, model } = require("mongoose")
 const SkillSchema = new Schema(
     { 
       
-        skillName:String
+        skillName:{type:String},
+        category:{type:String}
        },
  
   {
@@ -11,4 +12,4 @@ const SkillSchema = new Schema(
   }
 )
 
-module.exports = model("Skill", SkillSchema)
+module.exports = model("skill", SkillSchema)
