@@ -16,6 +16,8 @@ const {
 const userRoutes = require("./services/users/index");
 
 const videoRoutes = require("./services/videos");
+const skillRoutes =require("./services/skills/index")
+
 
 
 const server = express();
@@ -40,6 +42,9 @@ const corsOptions = {
 server.use(cors(corsOptions));
 server.use("/users", userRoutes);
 server.use("/videos", videoRoutes);
+server.use("/skills",skillRoutes)
+
+
 
 server.use(badRequestHandler);
 server.use(forbiddenHandler);

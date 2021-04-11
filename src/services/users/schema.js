@@ -27,9 +27,13 @@ const UserSchema = new Schema(
 
   
       skills:[{
-        skills: String
-        
+        skillName:String
+
         }],
+        goalSkills:[{
+          skillName:String
+  
+          }],
   
         posts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
     
