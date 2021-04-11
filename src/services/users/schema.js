@@ -25,10 +25,8 @@ const UserSchema = new Schema(
       savedVideos: [{ type: Schema.Types.ObjectId, ref: "Video" }],
       myProgress:[{ type: Schema.Types.ObjectId, ref: "progress" }],
     myWatchProgress:[{
-        skillName:{type:String},
-       
-
-        } ,{ timestamps: true }],
+      watch:{type:Number},createdAt:String, 
+        } ],
   
       skills:[{
         skillName:{type:String},

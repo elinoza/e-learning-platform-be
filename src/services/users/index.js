@@ -198,6 +198,22 @@ console.log("there is progress already so this is course duration--->",course.du
             new: true,
           }
         );
+
+
+        //izlediğim miktarı tarihli bir şekilde user schema  ekliyorum
+        const user= await UserSchema.findByIdAndUpdate(
+          req.user._id,
+          {
+            $addToSet: {
+              myWatchProgress: {watch:req.body.totalWatch,createdAt:new Date()}
+            }
+            
+          
+          },
+          { runValidators: true, new: true }
+        );
+
+        
         
         res.send(modifiedVideo);
       } else {
@@ -634,6 +650,25 @@ console.log({ skill })
     }
   }
 );
+
+
+//WEEKLY WATCH & GOALS
+userRouter.get("/me/weeklyWatch", authorize, async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const watch  = await UserSchema.findById(userId, {
+      myWatchProgress: 1,
+      _id: 0,
+    });
+
+    console.log(watch.myWatchProgress)
+    res.send(watch.myWatchProgress);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
 
 
 module.exports = userRouter;
