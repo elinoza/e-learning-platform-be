@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 
 const UserSchema = require("./schema");
 const VideoSchema = require("../videos/schema");
+const SkillSchema = require("../skills/schema");
 const myProgressSchema = require("../myProgress/schema");
 const completedSchema = require("../completed/schema");
 const passport = require("passport");
@@ -197,6 +198,22 @@ console.log("there is progress already so this is course duration--->",course.du
             new: true,
           }
         );
+
+
+        //izlediğim miktarı tarihli bir şekilde user schema  ekliyorum
+        const user= await UserSchema.findByIdAndUpdate(
+          req.user._id,
+          {
+            $addToSet: {
+              myWatchProgress: {watch:req.body.totalWatch,createdAt:new Date()}
+            }
+            
+          
+          },
+          { runValidators: true, new: true }
+        );
+
+        
         
         res.send(modifiedVideo);
       } else {
@@ -210,7 +227,7 @@ let percentage= newTotalWatch/duration
         
         const newVideo = new myProgressSchema({
           ...req.body,
-          playlistIndex:0,
+          skillIndex:0,
           totalWatch:newTotalWatch,
           completePercentage:percentage,
           remainingTime:  remainingTime,
@@ -275,7 +292,7 @@ userRouter.post("/myLearning/:courseId/complete", authorize, async (req, res, ne
 
 //  if exists find progress schema 
     if (course) { 
-      let playlistIndex=req.body.index +1
+      let skillIndex=req.body.index +1
       const completed = new completedSchema(req.body)
       const completedToInsert = { ...completed.toObject()}
       console.log(completed,completedToInsert)
@@ -384,43 +401,274 @@ userRouter.get("/myLearning/:courseId", authorize, async (req, res, next) => {
   }
 });
 
-// userRouter.post("/:courseId/myProgress", authorize,async (req, res, next) => {
-//   try {
- 
-   
-//     const myProgress = new myProgressSchema(req.body)
-    
-//     const progressToinsert = { ...myProgress.toObject(),course:req.params.courseId}
-//     console.log(myProgress,progressToinsert)
-
-//     const updated = await UserSchema.findByIdAndUpdate(
-//       req.user._id,
-//       {
-//         $push: {
-//           myProgress: progressToinsert,
-//         },
-//       },
-//       { runValidators: true, new: true }
-//     )
-//     res.status(201).send(updated)
-//   } catch (error) {
-//     next(error)
-//   }
-// })
 
 
-// userRouter.get("/myProgress", authorize,async (req, res, next) => {
-//   try {
-//     const { myProgress} = await UserSchema.findById(req.user._id, {
-//       myProgress: 1,
-//       _id: 0,
-//     }).populate("course")
-//     res.send(myProgress)
-//   } catch (error) {
-//     console.log(error)
-//     next(error)
-//   }
-// })
+
+
+///EMBEDDING skill
+
+userRouter.post(
+  "/me/skill",
+  authorize,
+  async (req, res, next) => {
+    try {
+
+
+      const userId = req.user._id;
+
+      const skill = new SkillSchema(req.body);
+
+      const skillToInsert = { ...skill.toObject() };
+      console.log(skill, skillToInsert);
+
+
+      const updated = await UserSchema.findByIdAndUpdate(
+        userId ,
+        {
+          $push: {
+            skills: skillToInsert,
+          },
+        },
+        { runValidators: true, new: true }
+      );
+      
+
+
+      res.status(201).send(updated.skills);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+userRouter.get("/me/skill", authorize, async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const skill  = await UserSchema.findById(userId, {
+      skills: 1,
+      _id: 0,
+    });
+
+    console.log(skill[0])
+    res.send(skill[0]);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
+
+
+userRouter.delete(
+  "/me/skill/:skillId",
+  authorize,
+  async (req, res, next) => {
+
+    try {
+      const userId = req.user._id;
+      const modifiedskill = await UserSchema.findByIdAndUpdate(
+        userId,
+        {
+          $pull: {
+            skill: { _id: mongoose.Types.ObjectId(req.params.skillId) },
+          },
+        },
+        {
+          new: true,
+        }
+      );
+      res.send(modifiedskill);
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
+
+userRouter.put(
+  "/me/skill/:skillId",
+  authorize,
+  async (req, res, next) => {
+    try {
+      const userId = req.user._id;
+      const { skill } = await UserSchema.findOne(
+        {
+          _id: mongoose.Types.ObjectId( userId),
+        },
+        {
+          _id: 0,
+          skill: {
+            $elemMatch: { _id: mongoose.Types.ObjectId(req.params.skillId) },
+          },
+        }
+      );
+console.log({ skill })
+      if (skill && skill.length > 0) {
+        const skillToReplace = { ...skill[0].toObject(), ...req.body };
+
+        const modifiedskill = await UserSchema.findOneAndUpdate(
+          {
+            _id: mongoose.Types.ObjectId( userId),
+            "skill._id": mongoose.Types.ObjectId(req.params.skillId),
+          },
+          { $set: { "skill.$": skillToReplace } },
+          {
+            runValidators: true,
+            new: true,
+          }
+        );
+        res.send(modifiedskill);
+      } else {
+        next();
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
+
+
+//GOAL SKILLS
+userRouter.post(
+  "/me/goalSkill",
+  authorize,
+  async (req, res, next) => {
+    try {
+
+
+      const userId = req.user._id;
+
+      const skill = new SkillSchema(req.body);
+
+      const skillToInsert = { ...skill.toObject() };
+      console.log(skill, skillToInsert);
+
+
+      const updated = await UserSchema.findByIdAndUpdate(
+        userId ,
+        {
+          $push: {
+            goalSkills: skillToInsert,
+          },
+        },
+        { runValidators: true, new: true }
+      );
+      
+
+
+      res.status(201).send(updated.skills);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+userRouter.get("/me/goalSkill", authorize, async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const skill  = await UserSchema.findById(userId, {
+      goalSkills: 1,
+      _id: 0,
+    });
+
+    console.log(skill)
+    res.send(skill[0]);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
+
+
+userRouter.delete(
+  "/me/goalSkill/:skillId",
+  authorize,
+  async (req, res, next) => {
+
+    try {
+      const userId = req.user._id;
+      const modifiedskill = await UserSchema.findByIdAndUpdate(
+        userId,
+        {
+          $pull: {
+            goalSkills: { _id: mongoose.Types.ObjectId(req.params.skillId) },
+          },
+        },
+        {
+          new: true,
+        }
+      );
+      res.send(modifiedskill);
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
+
+userRouter.put(
+  "/me/goalSkill/:skillId",
+  authorize,
+  async (req, res, next) => {
+    try {
+      const userId = req.user._id;
+      const { skill } = await UserSchema.findOne(
+        {
+          _id: mongoose.Types.ObjectId( userId),
+        },
+        {
+          _id: 0,
+          goalSkills: {
+            $elemMatch: { _id: mongoose.Types.ObjectId(req.params.skillId) },
+          },
+        }
+      );
+console.log({ skill })
+      if (skill && skill.length > 0) {
+        const skillToReplace = { ...skill[0].toObject(), ...req.body };
+
+        const modifiedskill = await UserSchema.findOneAndUpdate(
+          {
+            _id: mongoose.Types.ObjectId( userId),
+            "skill._id": mongoose.Types.ObjectId(req.params.skillId),
+          },
+          { $set: { "skill.$": skillToReplace } },
+          {
+            runValidators: true,
+            new: true,
+          }
+        );
+        res.send(modifiedskill);
+      } else {
+        next();
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
+
+
+//WEEKLY WATCH & GOALS
+userRouter.get("/me/weeklyWatch", authorize, async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const watch  = await UserSchema.findById(userId, {
+      myWatchProgress: 1,
+      _id: 0,
+    });
+
+    console.log(watch.myWatchProgress)
+    res.send(watch.myWatchProgress);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
 
 
 module.exports = userRouter;
