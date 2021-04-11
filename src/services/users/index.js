@@ -433,8 +433,8 @@ userRouter.get("/me/skill", authorize, async (req, res, next) => {
       _id: 0,
     });
 
-    console.log(skill)
-    res.send(skill);
+    console.log(skill[0])
+    res.send(skill[0]);
   } catch (error) {
     console.log(error);
     next(error);
@@ -557,7 +557,7 @@ userRouter.get("/me/goalSkill", authorize, async (req, res, next) => {
     });
 
     console.log(skill)
-    res.send(skill);
+    res.send(skill[0]);
   } catch (error) {
     console.log(error);
     next(error);

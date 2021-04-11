@@ -24,14 +24,20 @@ const UserSchema = new Schema(
       likedVideos :[{ type: Schema.Types.ObjectId, ref: "Video" }],
       savedVideos: [{ type: Schema.Types.ObjectId, ref: "Video" }],
       myProgress:[{ type: Schema.Types.ObjectId, ref: "progress" }],
+    myWatchProgress:[{
+        skillName:{type:String},
+       
 
+        } ,{ timestamps: true }],
   
       skills:[{
-        skillName:String
+        skillName:{type:String},
+        category:{type:String}
 
         }],
         goalSkills:[{
-          skillName:String
+          skillName:{type:String},
+        category:{type:String}
   
           }],
   
