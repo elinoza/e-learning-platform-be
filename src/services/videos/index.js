@@ -3,6 +3,7 @@ const mongoose = require("mongoose")
 const VideoSchema = require("./schema");
 const UserSchema = require("../users/Schema");
 const playlistSchema = require("../playlist/schema");
+const PostSchema = require("../posts/schema");
 const q2m = require("query-to-mongo")
 
 const { authenticate } = require("../auth/tools");
@@ -388,5 +389,100 @@ videoRouter.post("/unsave/:courseId", authorize, async (req, res, next) => {
     next(error);
   }
 });
+
+
+
+///POSTS 
+//Get video related posts
+videoRouter.get("/:courseId/posts", authorize, async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const courseId = req.params.courseId;
+    const posts = await  PostSchema.find(
+      {
+        
+          course: courseId
+      }
+    )
+    .populate('user')
+
+    if (posts) {
+      console.log(typeof posts[0])
+      res.send(posts[0]);
+    } else {
+      const error = new Error(` there is no post with this courseId`);
+      error.httpStatusCode = 404;
+      next(error);
+    }
+  } catch (error) {
+    return next(error);
+  }
+});
+
+// post a post related to video
+videoRouter.post("/:courseId/posts", authorize, async (req, res, next) => {
+  try {
+
+//kursa ait post oluştur.user ve video schemalarına da kayıt at
+
+
+    const id = req.params.courseId;
+
+    const course = await VideoSchema.findById(id);
+
+    if (course) {
+    
+
+console.log("hey new post is saved --> requestbody",req.body)
+
+        
+        const newPost= new PostSchema({
+          ...req.body,
+          course: req.params.courseId,
+          user: req.user._id
+        });
+
+        console.log("hello before saving")
+        //AŞağıda oluşturulan yeni progree kaydının idsi mevcut
+        const { _id } = await newPost.save();
+        console.log("hello after saving")
+        console.log("hey new postis saved here --> requestbody,newPost,postid",req.body,newPost,_id)
+        ///User Schemaya da  post kaydı atıyoruz ki daha sonra get /me ile ulaşabilelim
+        await UserSchema.findByIdAndUpdate(
+          req.user._id,
+          {
+            $addToSet: {
+              posts: _id,
+            },
+          },
+          { runValidators: true, new: true }
+        );
+         ///Video Schemaya da  post kaydı atıyoruz ki daha sonra get /videos ile ulaşabilelim
+          await VideoSchema.findByIdAndUpdate(
+          req.params.courseId,
+          {
+            $addToSet: {
+              posts: _id,
+            },
+          },
+          { runValidators: true, new: true }
+        );
+
+        res.send(newPost);
+    
+    } else {
+      //bu id ile bir kurs mevcut değil
+      const error = new Error();
+      error.httpStatusCode = 404;
+      next(error);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+  
+ 
+
 
 module.exports = videoRouter;
