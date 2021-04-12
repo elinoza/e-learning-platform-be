@@ -24,7 +24,7 @@ postRouter.get("/:postId/comments", authorize, async (req, res, next) => {
 
       if (comments.length > 0) {
         console.log("comments",comments);
-        res.send(comments[0]);
+        res.send(comments);
       } else {
         const error = new Error(` there is no comments with this postId`);
         error.httpStatusCode = 404;

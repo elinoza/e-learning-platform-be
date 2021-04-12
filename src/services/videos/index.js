@@ -4,6 +4,7 @@ const VideoSchema = require("./schema");
 const UserSchema = require("../users/Schema");
 const playlistSchema = require("../playlist/schema");
 const PostSchema = require("../posts/schema");
+const CommentSchema = require("../comments/schema");
 const q2m = require("query-to-mongo")
 
 const { authenticate } = require("../auth/tools");
@@ -405,6 +406,7 @@ videoRouter.get("/:courseId/posts", authorize, async (req, res, next) => {
       }
     )
     .populate('user')
+    .populate('comments')
 
     if (posts.length>0) {
       console.log(posts)
@@ -418,6 +420,7 @@ videoRouter.get("/:courseId/posts", authorize, async (req, res, next) => {
     return next(error);
   }
 });
+
 
 // post a post related to video
 videoRouter.post("/:courseId/posts", authorize, async (req, res, next) => {

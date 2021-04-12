@@ -12,6 +12,7 @@ const CommentSchema = new Schema(
 			ref: "user",
 			required: true,
 		},
+      
         post: { type: Schema.Types.ObjectId, ref: "post", required: true},
 		likes: [{ type: Schema.Types.ObjectId, ref: "user" }]
 		
