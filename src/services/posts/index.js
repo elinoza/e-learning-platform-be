@@ -1,7 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const PostSchema = require("./schema");
-const UserSchema = require("../users/Schema");
+const UserSchema = require("../users/schema");
 const CommentSchema = require("../comments/schema");
 const q2m = require("query-to-mongo");
 
