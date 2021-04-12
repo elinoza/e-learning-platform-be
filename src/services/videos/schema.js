@@ -31,7 +31,8 @@ const VideoSchema = new Schema(
     likes: [{ type: Schema.Types.ObjectId, ref: "user"}],
 
     saved: [{ type: Schema.Types.ObjectId, ref: "user" }],
-    posts: [{ type: Schema.Types.ObjectId, ref: "user" }],
+    posts: [{ type: Schema.Types.ObjectId, ref: "post" }],
+    
   },
 
   
