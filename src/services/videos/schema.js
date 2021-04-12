@@ -32,6 +32,7 @@ const VideoSchema = new Schema(
 
     saved: [{ type: Schema.Types.ObjectId, ref: "user" }],
     posts: [{ type: Schema.Types.ObjectId, ref: "post" }],
+    
   },
 
   

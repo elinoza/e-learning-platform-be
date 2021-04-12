@@ -178,4 +178,79 @@ postRouter.put(
   }
 );
 
+
+postRouter.post("/like/:postId", authorize, async (req, res, next) => {
+    try {
+      const Post = await PostSchema.findByIdAndUpdate(
+        req.params.postId,
+        {
+          $addToSet: {
+           likes: req.user._id,
+          },
+        },
+        {
+          runValidators: true,
+          new: true,
+        }
+      );
+      if (Post) {
+        const updated = await UserSchema.findByIdAndUpdate(
+          req.user,
+          {
+            $addToSet: {
+             likedPosts: req.params.postId,
+            },
+          },
+          { runValidators: true, new: true }
+        );
+        res.status(201).send("saved");
+      } else {
+        const error = new Error(
+          `Post with id ${req.params.postId} not found`
+        );
+        error.httpStatusCode = 404;
+        next(error);
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  postRouter.post("/unlike/:postId", authorize, async (req, res, next) => {
+    try {
+      const post = await PostSchema.findByIdAndUpdate(
+        req.params.postId,
+        {
+          $pull: {
+           likes: req.user._id,
+          },
+        },
+        {
+          runValidators: true,
+          new: true,
+        }
+      );
+      if (post) {
+        const updated = await UserSchema.findByIdAndUpdate(
+          req.user,
+          {
+            $pull: {
+              likedPosts: req.params.postId,
+            },
+          },
+          { runValidators: true, new: true }
+        );
+        res.status(201).send("removed the like")
+      } else {
+        const error = new Error(
+          `post with id ${req.params.postId} not found`
+        );
+        error.httpStatusCode = 404;
+        next(error);
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
 module.exports = postRouter;
