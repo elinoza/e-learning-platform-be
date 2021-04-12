@@ -406,9 +406,9 @@ videoRouter.get("/:courseId/posts", authorize, async (req, res, next) => {
     )
     .populate('user')
 
-    if (posts) {
-      console.log(typeof posts[0])
-      res.send(posts[0]);
+    if (posts.length>0) {
+      console.log(posts)
+      res.send(posts);
     } else {
       const error = new Error(` there is no post with this courseId`);
       error.httpStatusCode = 404;
@@ -481,6 +481,82 @@ console.log("hey new post is saved --> requestbody",req.body)
   }
 });
 
+videoRouter.delete(
+  "/:courseId/posts/:postId",
+  authorize,
+  async (req, res, next) => {
+    try {
+
+      // DELETE FROM POST SCHEMA
+      const post  = await PostSchema.findByIdAndDelete(req.params.postId);
+
+   // DELETE FROM USER & VIDEO SCHEMA
+       await UserSchema.findByIdAndUpdate(
+        req.user._id,
+        {
+          $pull: {
+            posts: { _id: mongoose.Types.ObjectId(req.params.postId) },
+          },
+        },
+        {
+          new: true,
+        }
+      );
+      await VideoSchema.findByIdAndUpdate(
+        req.params.courseId,
+        {
+          $pull: {
+            posts: { _id: mongoose.Types.ObjectId(req.params.postId) },
+          },
+        },
+        {
+          new: true,
+        }
+      );
+
+          if(post){ res.send("post deleted");}
+          else{const error = new Error(`post is not found`);
+          error.httpStatusCode = 404;
+          next(error);}
+     
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
+
+videoRouter.put(
+  "/:courseId/posts/:postId",
+  authorize,
+  async (req, res, next) => {
+    try {
+      const modifiedPost = await PostSchema.findByIdAndUpdate(
+        req.params.postId,
+        {...req.body,course:req.params.courseId,user:req.user._id},
+        {
+          runValidators: true,
+          new: true,
+        }
+      );
+
+
+
+
+
+
+      if(modifiedPost){ res.send(modifiedPost)}
+      else{const error = new Error(`post is not found`);
+      error.httpStatusCode = 404;
+      next(error);}
+
+
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
   
  
 
