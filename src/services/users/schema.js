@@ -27,6 +27,7 @@ const UserSchema = new Schema(
     myWatchProgress:[{
       watch:{type:Number},createdAt:String, 
         } ],
+        myWeeklyGoal:Number,
   
       skills:[{
         skillName:{type:String},

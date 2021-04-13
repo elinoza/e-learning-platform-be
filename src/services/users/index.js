@@ -653,12 +653,28 @@ console.log({ skill })
 
 
 //WEEKLY WATCH & GOALS
-userRouter.get("/me/weeklyWatch", authorize, async (req, res, next) => {
+// userRouter.get("/me/weeklyWatch", authorize, async (req, res, next) => {
+//   try {
+//     const userId = req.user._id;
+//     const watch  = await UserSchema.findById(userId, {
+//       myWatchProgress: 1,
+//       _id: 0,
+//     });
+
+//     console.log(watch.myWatchProgress)
+//     res.send(watch.myWatchProgress);
+//   } catch (error) {
+//     console.log(error);
+//     next(error);
+//   }
+// });
+
+userRouter.post("/me/myWeeklyGoal", authorize, async (req, res, next) => {
   try {
     const userId = req.user._id;
-    const watch  = await UserSchema.findById(userId, {
-      myWatchProgress: 1,
-      _id: 0,
+    const watch  = await UserSchema.findByIdAndUpdate(userId, {
+      myWeeklyGoal: req.body.myWeeklyGoal,
+   
     });
 
     console.log(watch.myWatchProgress)
